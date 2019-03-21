@@ -25,7 +25,12 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
 
                 try {
                     Jobs.JobsTable jobTable = new Jobs.JobsTable ();
-                    await jobTable.UpdateJobStatus (jobId, Jobs.JobStatusCode.Converting);
+                    await jobTable.InsertOrReplaceJob(new Jobs.Job(
+                        jobId, 
+                        Constants.GreyScaleMode, 
+                        Jobs.JobStatusCode.Converting, 
+                        cloudBlockBlob.Uri.AbsoluteUri
+                    ));
 
                     blobStream.Seek (0, SeekOrigin.Begin);
 
