@@ -17,7 +17,7 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
                 CloudBlobContainer successContainer = Access.GetSuccessOutputContainer ();
                 await successContainer.CreateIfNotExistsAsync ();
 
-                CloudBlobContainer failureContainer = Access.GetSuccessOutputContainer ();
+                CloudBlobContainer failureContainer = Access.GetFailureOutputContainer ();
                 await failureContainer.CreateIfNotExistsAsync ();
 
                 string convertedBlobName = $"{Guid.NewGuid().ToString()}-{name}";
