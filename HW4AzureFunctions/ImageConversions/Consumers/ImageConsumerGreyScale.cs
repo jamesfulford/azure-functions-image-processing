@@ -14,6 +14,7 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
         [FunctionName ("ImageConsumerGreyScale")]
         public static async Task Run([BlobTrigger(Constants.GreyScaleInputContainerName + "/{name}", Connection = Constants.AzureStorageConnectionStringEntry)] CloudBlockBlob cloudBlockBlob, string name, ILogger log) {
             log.LogInformation ("Running ImageConsumerGreyScale");
+            using (Stream blobStream = await cloudBlockBlob.OpenReadAsync ()) {
                 CloudBlobContainer successContainer = Access.GetSuccessOutputContainer ();
                 await successContainer.CreateIfNotExistsAsync ();
 
