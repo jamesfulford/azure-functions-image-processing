@@ -8,13 +8,13 @@ namespace HW4AzureFunctions {
 
         // Tables
         public const string JobsTableName = "imageconversionjobs";
-        public const string ImageJobsConversionPartitionId = "ImageJobs";
+        public const string ImageJobsConversionPartitionId = "imageconversions";
 
         // Conversion and Container Names
         public const string GreyScaleInputContainerName = "converttogreyscale";
-        public const string GreyScaleMode = "greyscale";
+        public const string GreyScaleMode = "GreyScale";
         public const string SepiaInputContainerName = "converttosepia";
-        public const string SepiaMode = "sepia";
+        public const string SepiaMode = "Sepia";
         public const string SuccessOutputContainerName = "convertedimages";
         public const string FailureOutputContainerName = "failedimages";
     }

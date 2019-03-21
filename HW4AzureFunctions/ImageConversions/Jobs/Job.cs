@@ -43,13 +43,13 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
         public static string GetStatusMessage (JobStatusCode code) {
             switch (code) {
                 case JobStatusCode.Received:
-                    return "Image received.";
+                    return "Image Obtained";
                 case JobStatusCode.Converting:
-                    return "Converting image.";
+                    return "Image Being Converted";
                 case JobStatusCode.Success:
-                    return "Successfully converted image.";
+                    return "Image Converted with success";
                 case JobStatusCode.Failure:
-                    return "Unknown error occurred during image conversion.";
+                    return "Image Failed Conversion";
                 default:
                     return "Unknown state!";
             }
