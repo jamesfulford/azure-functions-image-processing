@@ -16,11 +16,6 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
 
     public class Job : TableEntity {
         /// <summary>
-        /// Id of the string
-        /// </summary>
-        public string jobId;
-
-        /// <summary>
         /// Type of image conversion
         /// </summary>
         public string imageConversionMode;
@@ -68,7 +63,7 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
             string imageResult = null,
             string statusDescription = null
         ) {
-            this.jobId = jobId;
+            this.RowKey = jobId;
             this.imageConversionMode = imageConversionMode;
             this.status = status;
             this.imageSource = imageSource;

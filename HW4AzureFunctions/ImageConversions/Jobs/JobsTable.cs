@@ -65,6 +65,7 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
         /// </summary>
         /// <param name="job">The job to insert or replace.</param>
         public async Task<TableResult> InsertOrReplaceJob (Job job) {
+            job.PartitionKey = partitionKey;
             return await jobTable.ExecuteAsync (TableOperation.InsertOrReplace (job));
         }
     }
