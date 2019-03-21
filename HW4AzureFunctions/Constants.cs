@@ -1,7 +1,7 @@
 namespace HW4AzureFunctions {
     public class Constants {
         // Configuration Entrys
-        public const string AzureStorageConnectionStringEntry = "AZURE_STORAGE_CONNECTION_STRING";
+        public const string AzureStorageConnectionStringEntry = "AzureWebJobsStorage";
 
         // Metadata keynames
         public const string JobIdMetaData = "JOBID";

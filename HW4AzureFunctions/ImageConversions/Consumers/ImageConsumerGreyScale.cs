@@ -12,8 +12,8 @@ using SixLabors.ImageSharp.Processing;
 namespace HW4AzureFunctions.ImageConversions.Consumers {
     public static class ImageConsumerGreyScale {
         [FunctionName ("ImageConsumerGreyScale")]
-        public static async Task Run ([BlobTrigger ("converttogreyscale/{name}", Connection = Constants.AzureStorageConnectionStringEntry)] CloudBlockBlob myBlob, string name, ILogger log) {
-            using (Stream blobStream = await myBlob.OpenReadAsync ()) {
+        public static async Task Run([BlobTrigger(Constants.GreyScaleInputContainerName + "/{name}", Connection = Constants.AzureStorageConnectionStringEntry)] CloudBlockBlob cloudBlockBlob, string name, ILogger log) {
+            log.LogInformation ("Running ImageConsumerGreyScale");
                 CloudBlobContainer successContainer = Access.GetSuccessOutputContainer ();
                 await successContainer.CreateIfNotExistsAsync ();
 
