@@ -1,0 +1,10 @@
+Assignment #4: Image Conversion Functions
+James Fulford
+jaf968@g.harvard.edu
+
+NOTE: I implemented the extra credit, with something extra. When an image is removed, its job record's imageSourceattribute is set to null, for 2 reasons:
+
+    1. The URL in imageSource would no longer be functioning, so no sense keeping it available
+    2. Allows timed function to quickly see which successful conversions have not yet been cleaned up.
+
+(If this did not occur, the timed function would attempt to delete a large number of already deleted images. That could be quite costly if there are a lot of successful jobs.)
