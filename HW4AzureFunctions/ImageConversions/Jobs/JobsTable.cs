@@ -47,13 +47,14 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
         /// <param name="jobId">The job identifier.</param>
         /// <param name="status">Job status to set.</param>
         /// <param name="message">The statusDescription. Uses default messages if unspecified.</param>
-        public async Task<TableResult> UpdateJobStatus (string jobId, JobStatusCode status, string message = null) {
+        public async Task<TableResult> UpdateJobStatus (string jobId, JobStatusCode status, string message = null, string outputUrl = null) {
             Job job = await RetrieveJob (jobId);
             if (job != null) {
                 job.status = (int) status;
                 job.statusDescription = message != null ?
                     message :
                     Job.GetStatusMessage (status);
+                job.imageResult = outputUrl;
                 return await UpdateJob (job);
             } else {
                 throw new ArgumentException ($"Job ID {jobId} does not exist.");
