@@ -96,6 +96,5 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
                 }
             }
         }
-        }
     }
 }
