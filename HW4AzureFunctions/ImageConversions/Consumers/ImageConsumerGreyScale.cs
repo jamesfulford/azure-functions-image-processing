@@ -14,27 +14,38 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
         [FunctionName ("ImageConsumerGreyScale")]
         public static async Task Run([BlobTrigger(Constants.GreyScaleInputContainerName + "/{name}", Connection = Constants.AzureStorageConnectionStringEntry)] CloudBlockBlob cloudBlockBlob, string name, ILogger log) {
             log.LogInformation ("Running ImageConsumerGreyScale");
-            using (Stream blobStream = await cloudBlockBlob.OpenReadAsync ()) {
-                CloudBlobContainer successContainer = Access.GetSuccessOutputContainer ();
-                await successContainer.CreateIfNotExistsAsync ();
+            string convertedBlobName = $"{Guid.NewGuid().ToString()}-{name}";
+            string jobId = Guid.NewGuid().ToString();
 
-                CloudBlobContainer failureContainer = Access.GetFailureOutputContainer ();
-                await failureContainer.CreateIfNotExistsAsync ();
+            // Add job to jobs table
+            // (if fails, will not put image into failure container
+            Jobs.JobsTable jobTable = new Jobs.JobsTable();
+            await jobTable.InsertOrReplaceJob(new Jobs.Job(
+                jobId,
+                Constants.GreyScaleMode,
+                Jobs.JobStatusCode.Received,
+                cloudBlockBlob.Uri.AbsoluteUri
+            ));
 
-                string convertedBlobName = $"{Guid.NewGuid().ToString()}-{name}";
-                string jobId = Guid.NewGuid ().ToString ();
+            
+            // Try to open image
+            // (if can't open, then no way we can put it in failure container!)
+            using (Stream blobStream = await cloudBlockBlob.OpenReadAsync ())
+            {
+                // Update job status to converting
+                // (if fails, will still try to convert image)
+                await jobTable.UpdateJobStatus(jobId, Jobs.JobStatusCode.Converting);
 
                 try {
-                    Jobs.JobsTable jobTable = new Jobs.JobsTable ();
-                    await jobTable.InsertOrReplaceJob(new Jobs.Job(
-                        jobId, 
-                        Constants.GreyScaleMode, 
-                        Jobs.JobStatusCode.Converting, 
-                        cloudBlockBlob.Uri.AbsoluteUri
-                    ));
+                    // Try to get output container
+                    // (if fails, will try to put image in failure container)
+                    // (doing now so we can fail early if something is wrong!)
+                    CloudBlobContainer successContainer = Access.GetSuccessOutputContainer();
+                    await successContainer.CreateIfNotExistsAsync();
 
+                    // Try to convert and upload
+                    // (if fails, will try to put image in failure container)
                     blobStream.Seek (0, SeekOrigin.Begin);
-
                     using (MemoryStream convertedMemoryStream = new MemoryStream ())
                     using (Image<Rgba32> image = Image.Load (blobStream)) {
                         log.LogInformation ($"[+] Starting conversion of image {convertedBlobName}");
@@ -47,6 +58,7 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
                         log.LogInformation ($"[-] Completed conversion of image {convertedBlobName}");
                         log.LogInformation ($"[+] Storing image {convertedBlobName} into {Constants.SuccessOutputContainerName} container");
 
+                        // Upload to success container
                         CloudBlockBlob convertedBlockBlob = successContainer.GetBlockBlobReference (convertedBlobName);
                         convertedBlockBlob.Metadata.Add (Constants.JobIdMetaData, jobId);
                         convertedBlockBlob.Properties.ContentType = System.Net.Mime.MediaTypeNames.Image.Jpeg;
@@ -58,18 +70,26 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
                     log.LogError ($"Failed to convert blob {name}. {ex.Message}");
                     log.LogInformation ($"[+] Storing image {convertedBlobName} into {Constants.FailureOutputContainerName} container");
                     try {
+                        // Try to get failure container
+                        // (if fails, then hard fail.)
+                        CloudBlobContainer failureContainer = Access.GetFailureOutputContainer();
+                        await failureContainer.CreateIfNotExistsAsync();
+
+                        // Try to upload failed image.
+                        // (if fails, then hard fail)
                         CloudBlockBlob failedBlockBlob = failureContainer.GetBlockBlobReference (convertedBlobName);
                         failedBlockBlob.Metadata.Add (Constants.JobIdMetaData, jobId);
-
                         blobStream.Seek (0, SeekOrigin.Begin);
                         await failedBlockBlob.UploadFromStreamAsync (blobStream);
 
                         log.LogInformation ($"[+] Stored image {convertedBlobName} into {Constants.FailureOutputContainerName} container");
                     } catch (Exception ex2) {
+                        // Hard fail.
                         log.LogError ($"Failed to store blob {name} into {Constants.FailureOutputContainerName}. {ex2.Message}");
                     }
                 }
             }
+        }
         }
     }
 }
