@@ -23,7 +23,7 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
         /// <summary>
         /// Current state of this job.
         /// </summary>
-        public JobStatusCode status { get; set; }
+        public int status { get; set; }
 
         /// <summary>
         /// Human-readable status (or error, if applicable)
@@ -65,7 +65,7 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
         ) {
             this.RowKey = jobId;
             this.imageConversionMode = imageConversionMode;
-            this.status = status;
+            this.status = (int) status;
             this.imageSource = imageSource;
             this.imageResult = imageResult;
             this.statusDescription = statusDescription == null ?

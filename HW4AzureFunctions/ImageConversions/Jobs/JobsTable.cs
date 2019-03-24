@@ -50,7 +50,7 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
         public async Task<TableResult> UpdateJobStatus (string jobId, JobStatusCode status, string message = null) {
             Job job = await RetrieveJob (jobId);
             if (job != null) {
-                job.status = status;
+                job.status = (int) status;
                 job.statusDescription = message != null ?
                     message :
                     Job.GetStatusMessage (status);
