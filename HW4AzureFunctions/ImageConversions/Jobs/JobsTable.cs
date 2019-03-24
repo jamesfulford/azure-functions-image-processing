@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
@@ -18,6 +19,20 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
             client = storageAccount.CreateCloudTableClient ();
             jobTable = client.GetTableReference (Constants.JobsTableName);
             jobTable.CreateIfNotExistsAsync ().ConfigureAwait (false).GetAwaiter ().GetResult ();
+        }
+
+        public async Task<List<Job>> RetrieveAllJobs ()
+        {
+            // Courtesy of https://stackoverflow.com/questions/23940246/how-to-query-all-rows-in-windows-azure-table-storage
+            TableContinuationToken token = null;
+            var jobs = new List<Job>();
+            do
+            {
+                var queryResult = await jobTable.ExecuteQuerySegmentedAsync(new TableQuery<Job>(), token);
+                jobs.AddRange(queryResult.Results);
+                token = queryResult.ContinuationToken;
+            } while (token != null);
+            return jobs;
         }
 
         /// <summary>
