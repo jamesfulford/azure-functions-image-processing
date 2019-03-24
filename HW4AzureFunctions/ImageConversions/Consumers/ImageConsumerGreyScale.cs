@@ -16,6 +16,7 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
             log.LogInformation ("Running ImageConsumerGreyScale");
             string convertedBlobName = $"{Guid.NewGuid().ToString()}-{name}";
             string jobId = Guid.NewGuid().ToString();
+            log.LogInformation($"Associations: Converted Name: {convertedBlobName}, JobId: {jobId}");
 
             // Add job to jobs table
             // (if fails, will not put image into failure container
@@ -54,15 +55,15 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
                     blobStream.Seek (0, SeekOrigin.Begin);
                     using (MemoryStream convertedMemoryStream = new MemoryStream ())
                     using (Image<Rgba32> image = Image.Load (blobStream)) {
-                        log.LogInformation ($"[+] Starting conversion of image {convertedBlobName}");
+                        log.LogInformation ($"Starting conversion of image {convertedBlobName}");
 
                         image.Mutate (x => x.Grayscale ());
                         image.SaveAsJpeg (convertedMemoryStream);
 
                         convertedMemoryStream.Seek (0, SeekOrigin.Begin);
 
-                        log.LogInformation ($"[-] Completed conversion of image {convertedBlobName}");
-                        log.LogInformation ($"[+] Storing image {convertedBlobName} into {Constants.SuccessOutputContainerName} container");
+                        log.LogInformation ($"Completed conversion of image {convertedBlobName}");
+                        log.LogInformation ($"Storing image {convertedBlobName} into {Constants.SuccessOutputContainerName} container");
 
                         // Upload to success container
                         CloudBlockBlob convertedBlockBlob = successContainer.GetBlockBlobReference (convertedBlobName);
@@ -70,11 +71,11 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
                         convertedBlockBlob.Properties.ContentType = System.Net.Mime.MediaTypeNames.Image.Jpeg;
                         await convertedBlockBlob.UploadFromStreamAsync (convertedMemoryStream);
 
-                        log.LogInformation ($"[-] Stored image {convertedBlobName} into {Constants.SuccessOutputContainerName} container");
+                        log.LogInformation ($"Stored image {convertedBlobName} into {Constants.SuccessOutputContainerName} container");
                     }
                 } catch (Exception ex) {
                     log.LogError ($"Failed to convert blob {name}. {ex.Message}");
-                    log.LogInformation ($"[+] Storing image {convertedBlobName} into {Constants.FailureOutputContainerName} container");
+                    log.LogInformation ($"Storing image {convertedBlobName} into {Constants.FailureOutputContainerName} container");
                     try {
                         // Try to get failure container
                         // (if fails, then hard fail.)
@@ -88,7 +89,7 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
                         blobStream.Seek (0, SeekOrigin.Begin);
                         await failedBlockBlob.UploadFromStreamAsync (blobStream);
 
-                        log.LogInformation ($"[+] Stored image {convertedBlobName} into {Constants.FailureOutputContainerName} container");
+                        log.LogInformation ($"Stored image {convertedBlobName} into {Constants.FailureOutputContainerName} container");
                     } catch (Exception ex2) {
                         // Hard fail.
                         log.LogError ($"Failed to store blob {name} into {Constants.FailureOutputContainerName}. {ex2.Message}");
