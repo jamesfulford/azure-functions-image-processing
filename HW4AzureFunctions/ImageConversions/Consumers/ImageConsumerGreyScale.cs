@@ -32,16 +32,22 @@ namespace HW4AzureFunctions.ImageConversions.Consumers {
             // (if can't open, then no way we can put it in failure container!)
             using (Stream blobStream = await cloudBlockBlob.OpenReadAsync ())
             {
-                // Update job status to converting
-                // (if fails, will still try to convert image)
-                await jobTable.UpdateJobStatus(jobId, Jobs.JobStatusCode.Converting);
-
                 try {
                     // Try to get output container
                     // (if fails, will try to put image in failure container)
                     // (doing now so we can fail early if something is wrong!)
                     CloudBlobContainer successContainer = Access.GetSuccessOutputContainer();
                     await successContainer.CreateIfNotExistsAsync();
+
+                    // Update job status to converting
+                    // (if fails, will log and still try to convert image)
+                    try
+                    {
+                        await jobTable.UpdateJobStatus(jobId, Jobs.JobStatusCode.Converting);
+                    } catch (Exception ex)
+                    {
+                        log.LogError($"Could not update status of jobId: {jobId}: {ex.Message}");
+                    }
 
                     // Try to convert and upload
                     // (if fails, will try to put image in failure container)
