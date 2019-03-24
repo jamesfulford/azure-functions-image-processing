@@ -18,27 +18,27 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
         /// <summary>
         /// Type of image conversion
         /// </summary>
-        public string imageConversionMode;
+        public string imageConversionMode { get; set; }
 
         /// <summary>
         /// Current state of this job.
         /// </summary>
-        public JobStatusCode status;
+        public JobStatusCode status { get; set; }
 
         /// <summary>
         /// Human-readable status (or error, if applicable)
         /// </summary>
-        public string statusDescription;
+        public string statusDescription { get; set; }
 
         /// <summary>
         /// URL to Input image
         /// </summary>
-        public string imageSource;
+        public string imageSource { get; set; }
 
         /// <summary>
         /// URL to Output image
         /// </summary>
-        public string imageResult;
+        public string imageResult { get; set; }
 
         public static string GetStatusMessage (JobStatusCode code) {
             switch (code) {
@@ -72,5 +72,7 @@ namespace HW4AzureFunctions.ImageConversions.Jobs {
                 GetStatusMessage (status) :
                 statusDescription;
         }
+
+        public Job() { }
     }
 }
